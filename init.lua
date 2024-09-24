@@ -1,5 +1,33 @@
---[[
+-- autocompile cpp practice files
+vim.api.nvim_create_autocmd('BufWritePost', {
+  pattern = '*prac.cpp',
+  callback = function()
+    local file = vim.fn.expand '%' -- Gets the current filename (with extension)
+    local file_without_ext = vim.fn.expand '%:r' -- Gets the filename without extension
+    local file_dir = vim.fn.expand '%:p:h' -- Gets the directory of the current file
 
+    -- Define the AppleScript command to open a new iTerm2 tab and run the commands in the file's directory
+    local apple_script = [[
+        tell application "iTerm"
+            if not (exists window 1) then
+                create window with default profile
+            else
+                tell current window
+                    create tab with default profile
+                end tell
+            end if
+            tell current session of current window
+                write text "cd ]] .. file_dir .. [[ && g++ ]] .. file .. [[ -o ]] .. file_without_ext .. [[ && ./]] .. file_without_ext .. [["
+            end tell
+        end tell
+        ]]
+
+    -- Run the AppleScript using osascript
+    os.execute("osascript -e '" .. apple_script .. "'")
+  end,
+})
+
+--[[
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
 =====================================================================
@@ -91,7 +119,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
